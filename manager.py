@@ -6,7 +6,7 @@ import logging
 import datetime
 
 TELEGRAM_TOKEN = ""
-TELEGRAM_CHAT_ID = 
+TELEGRAM_CHAT_ID = ""
 
 
 class RequestsHandler(Handler):
@@ -50,19 +50,25 @@ class Manager:
         macd = myObj.getMACD(startDate=startDate, endDate=endDate)
         return macd
 
-    def callBack(self):
-        return self.getData(stockIndex='399106.XSHE', startDate='2021-01-21', endDate='2021-01-28') + self.getData(
-            '000001.XSHG', startDate='2021-01-21', endDate='2021-01-28')
-
-    def run(self):
+    def runOnce(self, startDate, endDate):
         logger = self.setup_logger()
 
-        # Run forever
+        data1 = self.getData(stockIndex='399106.XSHE', startDate=startDate, endDate=endDate) + self.getData(
+            '000001.XSHG', startDate=startDate, endDate=endDate)
+        print(data1)
+        logger.info(
+            "position: %s" % self.getPara(data=data1) + str(self.getMACD('2020-01-01', endDate)))
+
+    def runForever(self,startDate, endDate, interval):
+        logger = self.setup_logger()
+
         while True:
-            print(self.callBack())
+            data1 = self.getData(stockIndex='399106.XSHE', startDate=startDate, endDate=endDate) + self.getData(
+                '000001.XSHG', startDate=startDate, endDate=endDate)
+            print(data1)
             logger.info(
-                "position: %s" % self.getPara(data=self.callBack()) + str(self.getMACD('2020-01-01', '2021-01-28')))
-            sleep(600)
+                "position: %s" % self.getPara(data=data1) + str(self.getMACD('2020-01-01', endDate)))
+            sleep(interval)
 
     def setup_logger(self):
         # Prints logger info to terminal
@@ -76,7 +82,7 @@ class Manager:
         logger.addHandler(ch)
         return logger
 
-    def message(self):
+    def message(self, startDate, endDate, interval):
         logger = logging.getLogger('msg')
         logger.setLevel(logging.INFO)
 
@@ -86,13 +92,17 @@ class Manager:
         logger.addHandler(handler)
 
         logger.setLevel(logging.INFO)
-        # run forever
+        # run forever sending the position on the telegram
         while True:
+            data1 = self.getData(stockIndex='399106.XSHE', startDate=startDate, endDate=endDate) + self.getData(
+                '000001.XSHG', startDate=startDate, endDate=endDate)
+            print(data1)
             logger.info(
-                "position: %s" % self.getPara(data=self.callBack()) + str(self.getMACD('2020-01-01', '2021-01-28')))
-            sleep(10)
+                "position: %s" % self.getPara(data=data1) + str(self.getMACD('2020-01-01', endDate)))
+            sleep(interval)
 
 
 if __name__ == '__main__':
     myObj = Manager()
-    myObj.message()
+    myObj.runOnce('2021-06-30', '2021-07-07')
+    # myObj.message()
